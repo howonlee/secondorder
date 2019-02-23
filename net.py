@@ -1,3 +1,4 @@
+import random
 import numpy as np
 import numpy.random as npr
 import numpy.linalg as npl
@@ -22,38 +23,65 @@ def rand_onehots(shape):
         onehots[row, randcol] = 1.
     return onehots
 
-def calc_hess():
-    """ dead code for calculating analytic hessian. all of it """
-    """
-    hess = np.zeros((insize * outsize, insize* outsize))
-    for idx, member in np.ndenumerate(w):
-        hessrow = (idx[0] * outsize) + idx[1]
-        v[:] = 0.
-        v[idx] = 1.
-        rnet = np.dot(xs, v)
-        rh = rnet * dact(net)
-        rderr_dh = rh
-        # ddact doesn't exist
-        rderr_dnet = rderr_dh * dact(net)
-        rderr_dw = np.dot(xs.T, rderr_dnet)
-        hess[hessrow, :] = rderr_dw.ravel()
-    w -= alpha * np.dot(npl.inv(hess), derr_dw.ravel()).reshape(derr_dw.shape)
-    """
-    pass
 
-
-if __name__ == "__aain__":
+if __name__ == "__main__":
+    print("lol")
     xs = npr.randn(3,2)
-    ys = some shit
-    num_epochs = 10
+    ys = rand_onehots((3,3))
+    w1 = npr.randn(2,4)
+    w2 = npr.randn(4,3)
+    v1 = np.zeros_like(w1)
+    v2 = np.zeros_like(w2)
+    hess1 = np.zeros((v1.size, v1.size))
+    hess2 = np.zeros((v2.size, v2.size))
+    hidsize = w1.shape[1]
+    outsize = w2.shape[1]
     alpha = 1e-1
     r = 1e-9
-    xs, ys = pair
-    net = np.dot(xs, w)
-    h = act(net)
-    err = errfn(h, ys)
-    if it % 1 == 0:
-        print("it: {}, err: {}".format(str(it), str(err)))
-    derr_dh = h - ys
-    derr_dnet = derr_dh * dact(net)
-    derr_dw = np.dot(xs.T, derr_dnet)
+    net1 = np.dot(xs, w1)
+    h1 = act(net1)
+    net2 = np.dot(h1, w2)
+    h2 = act(net2)
+    err = errfn(h2, ys)
+    print("err: {}".format(str(err)))
+    derr_dh2 = h2 - ys
+    derr_dnet2 = derr_dh2 * dact(net2)
+    derr_dh1 = np.dot(derr_dnet2, w2.T)
+    derr_dnet1 = derr_dh1 * dact(net1)
+    derr_dw2 = np.dot(h1.T, derr_dnet2)
+    derr_dw1 = np.dot(xs.T, derr_dnet1)
+    derr_dx = np.dot(derr_dnet1, w1.T)
+    for idx, member in np.ndenumerate(w1):
+        hessrow = (idx[0] * hidsize) + idx[1]
+        v1[:] = 0.
+        v2[:] = 0.
+        v1[idx] = 1.
+        analytic_rnet1 = np.dot(xs, v1)
+        analytic_rh1 = analytic_rnet1 * dact(net1)
+        analytic_rnet2 = np.dot(analytic_rh1, w2) + np.dot(h1, v2)
+        analytic_rh2 = analytic_rnet2 * dact(net2)
+        analytic_derr_dh2 = analytic_rh2
+        analytic_derr_dnet2 = (analytic_derr_dh2 * dact(net2))
+        analytic_derr_dh1 = np.dot(analytic_derr_dnet2, w2.T) + np.dot(derr_dnet2, v2.T)
+        analytic_derr_dnet1 = (analytic_derr_dh1 * dact(net1))
+        analytic_derr_dx = np.dot(analytic_derr_dnet1, w1.T) + np.dot(derr_dnet1, v1.T)
+        analytic_derr_dw1 = np.dot(xs.T, analytic_derr_dnet1)
+        hess1[hessrow, :] = analytic_derr_dw1.ravel()
+    for idx, member in np.ndenumerate(w2):
+        hessrow = (idx[0] * outsize) + idx[1]
+        v1[:] = 0.
+        v2[:] = 0.
+        v2[idx] = 1.
+        analytic_rnet1 = np.dot(xs, v1)
+        analytic_rh1 = analytic_rnet1 * dact(net1)
+        analytic_rnet2 = np.dot(analytic_rh1, w2) + np.dot(h1, v2)
+        analytic_rh2 = analytic_rnet2 * dact(net2)
+        analytic_derr_dh2 = analytic_rh2
+        analytic_derr_dnet2 = (analytic_derr_dh2 * dact(net2))
+        analytic_derr_dh1 = np.dot(analytic_derr_dnet2, w2.T) + np.dot(derr_dnet2, v2.T)
+        analytic_derr_dnet1 = (analytic_derr_dh1 * dact(net1))
+        analytic_derr_dx = np.dot(analytic_derr_dnet1, w1.T) + np.dot(derr_dnet1, v1.T)
+        analytic_derr_dw2 = np.dot(h1.T, analytic_derr_dnet2) + np.dot(analytic_rh1.T, derr_dnet2)
+        hess2[hessrow, :] = analytic_derr_dw2.ravel()
+    import pdb
+    pdb.set_trace()
