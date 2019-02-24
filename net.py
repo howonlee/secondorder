@@ -83,5 +83,41 @@ if __name__ == "__main__":
         analytic_derr_dx = np.dot(analytic_derr_dnet1, w1.T) + np.dot(derr_dnet1, v1.T)
         analytic_derr_dw2 = np.dot(h1.T, analytic_derr_dnet2) + np.dot(analytic_rh1.T, derr_dnet2)
         hess2[hessrow, :] = analytic_derr_dw2.ravel()
+    # execute the inversion with the still-in dealie. assume bad conditioning got us into a mess
+    fd1_derr_dw1 = derr_dw1 * (1. + (r / 2.))
+    fd2_derr_dw1 = derr_dw1 * (1. - (r / 2.))
+    fd1_derr_dw2 = derr_dw2 * (1. + (r / 2.))
+    fd2_derr_dw2 = derr_dw2 * (1. - (r / 2.))
+    print("start first pinv")
+    fd1_derr_dnet1 = np.dot(npl.pinv(xs.t), fd1_derr_dw1)
+    fd2_derr_dnet1 = np.dot(npl.pinv(xs.t), fd2_derr_dw1)
+    fd1_derr_dnet2 = np.dot(npl.pinv(h1.t), fd1_derr_dw2)
+    fd2_derr_dnet2 = np.dot(npl.pinv(h1.t), fd2_derr_dw2)
+    print("end first pinv")
+    fd1_derr_dh1 = fd1_derr_dnet1 / dact(net1)
+    fd2_derr_dh1 = fd2_derr_dnet1 / dact(net1)
+    fd1_derr_dh2 = fd1_derr_dnet2 / dact(net2)
+    fd2_derr_dh2 = fd2_derr_dnet2 / dact(net2)
+    fd1_h2 = fd1_derr_dh2 + ys
+    fd2_h2 = fd2_derr_dh2 + ys
+    fd1_net2 = inv_act(fd1_h2)
+    fd2_net2 = inv_act(fd2_h2)
+    #############
+    #############
+    #############
+    print("start second pinv")
+    fd1_h1 = np.dot(npl.pinv(some shit), fd1_net2)
+    fd2_h1 = np.dot(npl.pinv(some shit), fd2_net2)
+    print("end second pinv")
+    fd1_net1 = inv_act(fd1_h1)
+    fd2_net1 = inv_act(fd2_h1)
+    print("start third pinv")
+    fd1_w = np.dot(npl.pinv(xs), fd1_net)
+    fd2_w = np.dot(npl.pinv(xs), fd2_net)
+    print("end third pinv")
+    print("start fourth pinv")
+    print("end fourth pinv")
+    fd_w = (fd1_w - fd2_w) / r
+    w -= alpha * fd_w
     import pdb
     pdb.set_trace()
