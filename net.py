@@ -51,6 +51,9 @@ if __name__ == "__main__":
     derr_dw2 = np.dot(h1.T, derr_dnet2)
     derr_dw1 = np.dot(xs.T, derr_dnet1)
     derr_dx = np.dot(derr_dnet1, w1.T)
+    ###
+    ### Naive hessian starts here
+    ###
     for idx, member in np.ndenumerate(w1):
         hessrow = (idx[0] * hidsize) + idx[1]
         v1[:] = 0.
@@ -83,7 +86,12 @@ if __name__ == "__main__":
         analytic_derr_dx = np.dot(analytic_derr_dnet1, w1.T) + np.dot(derr_dnet1, v1.T)
         analytic_derr_dw2 = np.dot(h1.T, analytic_derr_dnet2) + np.dot(analytic_rh1.T, derr_dnet2)
         hess2[hessrow, :] = analytic_derr_dw2.ravel()
-    # execute the inversion with the still-in dealie. assume bad conditioning got us into a mess
+    ###
+    ### Naive full hessian ends here
+    ###
+    ###
+    ### Fast inverse hessian starts here
+    ###
     fd1_derr_dw1 = derr_dw1 * (1. + (r / 2.))
     fd2_derr_dw1 = derr_dw1 * (1. - (r / 2.))
     fd1_derr_dw2 = derr_dw2 * (1. + (r / 2.))
@@ -117,5 +125,6 @@ if __name__ == "__main__":
     print("and for w2: ")
     print(np.allclose(np.dot(npl.inv(hess2), derr_dw2.ravel()).reshape(3,3), fd_w2, rtol=1e-3, atol=1e-4))
     print("note awful tolerances. if you actually wanted to run in production you could fix with higher order FD or sitting down and writing analytic solution")
+    print("and now we go into the shell so you can try this...")
     import pdb
     pdb.set_trace()
