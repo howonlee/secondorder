@@ -1,4 +1,4 @@
-Second Order Neural Nets, with Finite Difference
+Fast Newton's Method for Neural Nets, with Finite Difference
 =====
 
 With some particularly insane numerics
