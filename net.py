@@ -25,18 +25,18 @@ def rand_onehots(shape):
 
 
 if __name__ == "__main__":
-    print("lol")
-    xs = npr.randn(3,2)
-    ys = rand_onehots((3,3))
-    w1 = npr.randn(2,4)
-    w2 = npr.randn(4,3)
+    # condition _everything_
+    # this doesn't make much sense
+    xs = npr.randn(3,3) + np.eye(3) * 0.1
+    ys = rand_onehots((3,3)) + np.eye(3) * 0.1
+    w1 = npr.randn(3,3) + np.eye(3) * 0.1
+    w2 = npr.randn(3,3) + np.eye(3) * 0.1
     v1 = np.zeros_like(w1)
     v2 = np.zeros_like(w2)
     hess1 = np.zeros((v1.size, v1.size))
     hess2 = np.zeros((v2.size, v2.size))
     hidsize = w1.shape[1]
     outsize = w2.shape[1]
-    alpha = 1e-1
     r = 1e-9
     net1 = np.dot(xs, w1)
     h1 = act(net1)
@@ -88,12 +88,10 @@ if __name__ == "__main__":
     fd2_derr_dw1 = derr_dw1 * (1. - (r / 2.))
     fd1_derr_dw2 = derr_dw2 * (1. + (r / 2.))
     fd2_derr_dw2 = derr_dw2 * (1. - (r / 2.))
-    print("start first pinv")
     fd1_derr_dnet1 = np.dot(npl.pinv(xs.T), fd1_derr_dw1)
     fd2_derr_dnet1 = np.dot(npl.pinv(xs.T), fd2_derr_dw1)
     fd1_derr_dnet2 = np.dot(npl.pinv(h1.T), fd1_derr_dw2)
     fd2_derr_dnet2 = np.dot(npl.pinv(h1.T), fd2_derr_dw2)
-    print("end first pinv")
     fd1_derr_dh1 = fd1_derr_dnet1 / dact(net1)
     fd2_derr_dh1 = fd2_derr_dnet1 / dact(net1)
     fd1_derr_dh2 = fd1_derr_dnet2 / dact(net2)
@@ -102,21 +100,22 @@ if __name__ == "__main__":
     fd2_h2 = fd2_derr_dh2 + ys
     fd1_net2 = inv_act(fd1_h2)
     fd2_net2 = inv_act(fd2_h2)
-    print("start second pinv")
     fd1_h1 = np.dot(fd1_net2, npl.pinv(w2))
     fd2_h1 = np.dot(fd2_net2, npl.pinv(w2))
-    print("end second pinv")
     fd1_net1 = inv_act(fd1_h1)
     fd2_net1 = inv_act(fd2_h1)
-    print("start third pinv")
     fd1_w1 = np.dot(npl.pinv(xs), fd1_net1)
     fd2_w1 = np.dot(npl.pinv(xs), fd2_net1)
-    print("end third pinv")
-    print("start fourth pinv")
     fd1_w2 = np.dot(npl.pinv(h1), fd1_net2)
     fd2_w2 = np.dot(npl.pinv(h1), fd2_net2)
-    print("end fourth pinv")
     fd_w1 = (fd1_w1 - fd2_w1) / r
     fd_w2 = (fd1_w2 - fd2_w2) / r
+    print("to check if this is correct:")
+    print("np.dot(npl.inv(hess1), derr_dw1.ravel()).reshape(3,3)")
+    print("like so: ")
+    print(np.allclose(np.dot(npl.inv(hess1), derr_dw1.ravel()).reshape(3,3), fd_w1, rtol=1e-3, atol=1e-4))
+    print("and for w2: ")
+    print(np.allclose(np.dot(npl.inv(hess2), derr_dw2.ravel()).reshape(3,3), fd_w2, rtol=1e-3, atol=1e-4))
+    print("note awful tolerances. if you actually wanted to run in production you could fix with higher order FD or sitting down and writing analytic solution")
     import pdb
     pdb.set_trace()
