@@ -11,4 +11,4 @@ The pretty strict and extremely strange requirement is that everything have the 
 
 The bad numerics is entirely contingent on the finite difference interpretation. Just as in the Pearlmutter method, you should be able to also get an analytic solution by actually taking the definition of the Gateaux derivative. But unlike my [previous repo](https://github.com/howonlee/twostrangethings), which had only a trivial neural net, this is a true second order nontrivial net. Only the barest of nontriviality, of course.
 
-I now consider this damned thing finished as it will be before I work on other stuff. Next is the nth order Householder functions and trying this method on some extremely other things before actually beginning on the CSPAM project.
+I now consider this damned thing finished as it will be before I work on other stuff. Next is the nth order Householder functions and trying this method on some extremely other things before actually beginning on the CSPAM project. Householder functions I believe will not be incredibly nontrivial but very tedious, but I am filled with fear and apprehension attacking the extremely other things. But that is the way things are.
