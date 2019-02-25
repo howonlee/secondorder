@@ -102,22 +102,21 @@ if __name__ == "__main__":
     fd2_h2 = fd2_derr_dh2 + ys
     fd1_net2 = inv_act(fd1_h2)
     fd2_net2 = inv_act(fd2_h2)
-    #############
-    #############
-    #############
     print("start second pinv")
-    fd1_h1 = np.dot(npl.pinv(some shit), fd1_net2)
-    fd2_h1 = np.dot(npl.pinv(some shit), fd2_net2)
+    fd1_h1 = np.dot(fd1_net2, npl.pinv(w2))
+    fd2_h1 = np.dot(fd2_net2, npl.pinv(w2))
     print("end second pinv")
     fd1_net1 = inv_act(fd1_h1)
     fd2_net1 = inv_act(fd2_h1)
     print("start third pinv")
-    fd1_w = np.dot(npl.pinv(xs), fd1_net)
-    fd2_w = np.dot(npl.pinv(xs), fd2_net)
+    fd1_w1 = np.dot(npl.pinv(xs), fd1_net1)
+    fd2_w1 = np.dot(npl.pinv(xs), fd2_net1)
     print("end third pinv")
     print("start fourth pinv")
+    fd1_w2 = np.dot(npl.pinv(h1), fd1_net2)
+    fd2_w2 = np.dot(npl.pinv(h1), fd2_net2)
     print("end fourth pinv")
-    fd_w = (fd1_w - fd2_w) / r
-    w -= alpha * fd_w
+    fd_w1 = (fd1_w1 - fd2_w1) / r
+    fd_w2 = (fd1_w2 - fd2_w2) / r
     import pdb
     pdb.set_trace()
